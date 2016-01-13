@@ -55,7 +55,6 @@ class WebPageManager():
         self.http    = data[2]
         self.address = data[6]
         self.path    = self.BASE_DIR + self.file
-        print(self.path)
 
     # Checks to see if a file exists
     def exists(self):
