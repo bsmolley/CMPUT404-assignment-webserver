@@ -1,8 +1,9 @@
 #  coding: utf-8
+
+# Brandon Smolley - Cmput 404
 import SocketServer
 import os
 import mimetypes
-import urllib2
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 #
