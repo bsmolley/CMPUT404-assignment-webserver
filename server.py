@@ -51,7 +51,6 @@ class WebPageManager():
     CODE_404 = "404 Not found\n\n"
     CONTENT  = "Content-Type: "
     INDEX    = "/index.html"
-    path     = None
 
     # Initiliaze the class with usable variables
     def __init__(self, data):
@@ -70,7 +69,7 @@ class WebPageManager():
         return False
 
     def handle(self, server):
-        # If the file has a minetype, serve it
+        # If the file has a mimetype, serve it
         if (self.mime_type != None):
             self.showPage(server)
 
