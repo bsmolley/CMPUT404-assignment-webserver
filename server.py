@@ -100,6 +100,7 @@ class WebPageManager():
         message = self.http + " " + self.CODE_301
         server.request.sendall(message)
         server.request.sendall("Location: " + self.file + "/" + "\n\n")
+        self.showIndex(server)
         # server.request.sendall("<html lang=en><title>Error 301 Moved Permanently</title>")
         # server.request.sendall("<b><body>301 Moved Permanently</body></b>\n\n")
 
