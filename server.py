@@ -47,6 +47,7 @@ class WebPageManager():
 
     BASE_DIR = "./www"
     CODE_OK  = "200 OK\n"
+    CODE_301 = "301 Moved Permanently"
     CODE_404 = "404 Not found\n\n"
     CONTENT  = "Content-Type: "
     INDEX    = "/index.html"
@@ -59,7 +60,7 @@ class WebPageManager():
         self.http    = data[2]
         self.address = data[6]
         self.path    = self.BASE_DIR + self.file
-
+        self.mime_type = mimetypes.guess_type(self.path)[0]
     # Checks to see if a file exists
     def exists(self):
         # the ".." check handles any /../../../.. paths
@@ -68,22 +69,18 @@ class WebPageManager():
         return False
 
     def handle(self, server):
-        mime_type = mimetypes.guess_type(self.path)[0]
         # If the file has a minetype, serve it
-        if (mime_type != None):
-            message = self.http + " " + self.CODE_OK + self.CONTENT + mime_type + "\n\n"
-            server.request.sendall(message)
-            with open(self.path) as f:
-                server.request.sendall(f.read())
+        if (self.mime_type != None):
+            self.showPage(server)
 
         # If no file was specified, return index.html
-        elif (mime_type == None):
-            self.path = self.path + self.INDEX
-            mime_type = mimetypes.guess_type(self.path)[0]
-            message = self.http + " " + self.CODE_OK + self.CONTENT + mime_type + "\n\n"
-            server.request.sendall(message)
-            with open(self.path) as f:
-                server.request.sendall(f.read())
+        elif (self.mime_type == None):
+            # handles ../deep, as opposed to ../deep/
+            if (self.path[-1] != "/"):
+                self.redirect(server)
+            # normal case, return index.html
+            else:
+                self.showIndex(server)
 
         else:
             server.request.sendall("OK")
@@ -98,6 +95,28 @@ class WebPageManager():
         server.request.sendall("<html lang=en><title>Error 404 Not Found</title>")
         server.request.sendall("<b><body>404 Page not found</body></b>\n\n")
 
+    # Handles code 301
+    def redirect(self, server):
+        message = self.http + " " + self.CODE_301 + "\n\n"
+        server.request.sendall(message)
+        server.request.sendall("<html lang=en><title>Error 301 Moved Permanently</title>")
+        server.request.sendall("<b><body>301 Moved Permanently</body></b>\n\n")
+
+    # Handle a case where the page is not specified, returns index.html
+    def showIndex(self, server):
+        self.path = self.path + self.INDEX
+        self.mime_type = mimetypes.guess_type(self.path)[0]
+        message = self.http + " " + self.CODE_OK + self.CONTENT + self.mime_type + "\n\n"
+        server.request.sendall(message)
+        with open(self.path) as f:
+            server.request.sendall(f.read())
+
+    # Normal page request handler, returns desired page
+    def showPage(self, server):
+        message = self.http + " " + self.CODE_OK + self.CONTENT + self.mime_type + "\n\n"
+        server.request.sendall(message)
+        with open(self.path) as f:
+            server.request.sendall(f.read())
 
 
 class MyWebServer(SocketServer.BaseRequestHandler):
