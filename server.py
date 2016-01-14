@@ -5,7 +5,7 @@ import SocketServer
 import os
 import mimetypes
 
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+# Copyright 2016 Brandon Smolley
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class WebPageManager():
     def redirect(self, server):
         message = self.http + " " + self.CODE_301
         server.request.sendall(message)
-        server.request.sendall("Location: " + self.file + self.INDEX + "\n\n")
+        server.request.sendall("Location: " + self.file + "/" + "\n\n")
         # server.request.sendall("<html lang=en><title>Error 301 Moved Permanently</title>")
         # server.request.sendall("<b><body>301 Moved Permanently</body></b>\n\n")
 
