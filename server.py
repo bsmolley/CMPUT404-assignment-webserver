@@ -47,7 +47,7 @@ class WebPageManager():
 
     BASE_DIR = "./www"
     CODE_OK  = "200 OK\n"
-    CODE_301 = "301 Moved Permanently"
+    CODE_301 = "301 Moved Permanently\r\n"
     CODE_404 = "404 Not found\n\n"
     CONTENT  = "Content-Type: "
     INDEX    = "/index.html"
@@ -61,6 +61,7 @@ class WebPageManager():
         self.address = data[6]
         self.path    = self.BASE_DIR + self.file
         self.mime_type = mimetypes.guess_type(self.path)[0]
+        
     # Checks to see if a file exists
     def exists(self):
         # the ".." check handles any /../../../.. paths
@@ -97,16 +98,17 @@ class WebPageManager():
 
     # Handles code 301
     def redirect(self, server):
-        message = self.http + " " + self.CODE_301 + "\n\n"
+        message = self.http + " " + self.CODE_301
         server.request.sendall(message)
-        server.request.sendall("<html lang=en><title>Error 301 Moved Permanently</title>")
-        server.request.sendall("<b><body>301 Moved Permanently</body></b>\n\n")
+        server.request.sendall("Location: " + self.file + self.INDEX + "\n\n")
+        # server.request.sendall("<html lang=en><title>Error 301 Moved Permanently</title>")
+        # server.request.sendall("<b><body>301 Moved Permanently</body></b>\n\n")
 
     # Handle a case where the page is not specified, returns index.html
     def showIndex(self, server):
         self.path = self.path + self.INDEX
         self.mime_type = mimetypes.guess_type(self.path)[0]
-        message = self.http + " " + self.CODE_OK + self.CONTENT + self.mime_type + "\n\n"
+        message = self.http + " " + self.CODE_OK + self.CONTENT + self.mime_type + "\r\n\r\n"
         server.request.sendall(message)
         with open(self.path) as f:
             server.request.sendall(f.read())
