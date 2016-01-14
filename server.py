@@ -46,7 +46,11 @@ self.data =
 class WebPageManager():
 
     BASE_DIR = "./www"
-    path = None
+    CODE_OK  = "200 OK\n"
+    CODE_404 = "404 Not found\n\n"
+    CONTENT  = "Content-Type: "
+    INDEX    = "/index.html"
+    path     = None
 
     # Initiliaze the class with usable variables
     def __init__(self, data):
@@ -58,6 +62,7 @@ class WebPageManager():
 
     # Checks to see if a file exists
     def exists(self):
+        # the ".." check handles any /../../../.. paths
         if (os.path.exists(self.path) and ".." not in self.path):
             return True
         return False
@@ -66,16 +71,16 @@ class WebPageManager():
         mime_type = mimetypes.guess_type(self.path)[0]
         # If the file has a minetype, serve it
         if (mime_type != None):
-            message = self.http + " " + "200 OK\n" + "Content-Type: " + mime_type + "\n\n"
+            message = self.http + " " + self.CODE_OK + self.CONTENT + mime_type + "\n\n"
             server.request.sendall(message)
             with open(self.path) as f:
                 server.request.sendall(f.read())
 
         # If no file was specified, return index.html
         elif (mime_type == None):
-            self.path = self.path + "/index.html"
+            self.path = self.path + self.INDEX
             mime_type = mimetypes.guess_type(self.path)[0]
-            message = self.http + " " + "200 OK\n" + "Content-Type: " + mime_type + "\n\n"
+            message = self.http + " " + self.CODE_OK + self.CONTENT + mime_type + "\n\n"
             server.request.sendall(message)
             with open(self.path) as f:
                 server.request.sendall(f.read())
@@ -89,7 +94,7 @@ class WebPageManager():
 
     # Handles the 404 error
     def notFound(self, server):
-        server.request.sendall(self.http + " " + "404 Not found\n\n")
+        server.request.sendall(self.http + " " + self.CODE_404)
         server.request.sendall("<html lang=en><title>Error 404 Not Found</title>")
         server.request.sendall("<b><body>404 Page not found</body></b>\n\n")
 
@@ -100,15 +105,21 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         data = self.data.split()
+        # only handle valid requests
         if (len(data) > 0):
             print ("Got a request of: %s\n" % self.data)
+            # init the WebPageManager with the request information
             manager = WebPageManager(data)
+            # if it's a GET request
             if (manager.getRequestType() == "GET"):
+                # make sure the file exists
                 if (manager.exists()):
                     manager.handle(self)
+                # otherwise report a 404 error
                 else:
                     manager.notFound(self)
 
+        # safety return
         else:
             self.request.sendall("OK")
 
