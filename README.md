@@ -28,3 +28,7 @@ Referenced Code
 ===========================
 http://stackoverflow.com/questions/22083359/send-text-http-over-python-socket
 http://www.acmesystems.it/python_httpd
+
+Consultation
+===========================
+Michael Stensby
